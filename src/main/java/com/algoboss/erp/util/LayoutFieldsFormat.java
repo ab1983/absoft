@@ -595,6 +595,7 @@ public class LayoutFieldsFormat {
 			} else {
 				fieldOptions.setName(fieldName);
 			}
+			fieldOptions.setFieldContainerParent(fieldContainer);
 			fieldContainer.getFieldOptionsList().add(fieldOptions);
 		}
 		return fieldOptions;

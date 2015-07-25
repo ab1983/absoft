@@ -261,6 +261,9 @@ public class TIpi {
     }
 
     /**
+     * Código de Enquadramento Legal do IPI
+     * Tabela a ser criada pela RFB, informar 999 enquanto a
+		tabela não for criada
      * Sets the value of the cEnq property.
      * 
      * @param value
@@ -467,6 +470,11 @@ public class TIpi {
         }
 
         /**
+         * Código da situação tributária do IPI
+         * 00=Entrada com recuperação de crédito
+			49=Outras entradas
+			50=Saída tributada
+			99=Outras saídas
          * Sets the value of the cst property.
          * 
          * @param value

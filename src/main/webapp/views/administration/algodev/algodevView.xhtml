@@ -11,7 +11,7 @@
        		<!-- 
        		<h:outputScript library="js" name="algodevView.js" target="head"></h:outputScript>
        		 -->
-    <h:form>  
+    <h:form styleClass="container-header">  
     	<f:event type="preRenderComponent" listener="#{app.initBrowserCache()}"/>
     	<f:event type="preRenderComponent" listener="#{app.setIdxBrowserCached('')}"/>
     	<p:remoteCommand rendered="true" name="updateCache" immediate="true" update="@form" oncomplete="updateCurrentForm()"/>
@@ -19,7 +19,7 @@
     		beanMapCache = new Array();
     	</script>
     </h:form>
-    <h:form prependId="false" acceptcharset="ISO-8859-1" styleClass="ui-algo-container-form" >    
+    <h:form prependId="false" acceptcharset="ISO-8859-1" styleClass="ui-algo-container-form" style="" >    
         <p:remoteCommand rendered="true" name="updateCurrentForm" immediate="true" update="@form"/>
         <p:remoteCommand rendered="false" name="updateBasePanel" update=":basePanel"/>  
         <p:remoteCommand name="updateStartPage" update="@form"/>  
@@ -46,8 +46,30 @@
         <f:event type="preRenderComponent" listener="#{(app.updateContainerPage())}"/>        
          -->
          <f:event type="preRenderComponent" listener="#{app.preRenderComponent}"/>
-         
-        <p:dialog onShow="prepareExportHtmlToPdf('.ui-algo-container .ui-datatable-tablewrapper');" widgetVar="exportTableDlg" header="Selecione o Formato para Exportação" modal="false" dynamic="true" resizable="false">
+        <style>
+            .ui-algo-element-container{
+                /*position: relative !important;*/
+            }
+            .ui-algo-element-value{
+                /*position: absolute !important;*/
+            }
+        </style>
+        <script type="text/javascript">
+            /* <![CDATA[ */   
+	            onStart('#{app.containerPage}');
+            
+	            $(document).ready(function() {
+	       		 	formatMaskFields("#{msg['dateMask']}","#{msg['timeMask']}",'#{msg.thousandsSeparator}','#{msg.decimalSeparator}');                        	
+	           });	            
+            /* ]]> */
+        </script>         
+        <style>
+        	#{app.requirement.requirementStyle}
+        </style>
+    </h:form>
+    <h:form styleClass="handleFileDlgx" > 
+    
+            <p:dialog onShow="prepareExportHtmlToPdf('.ui-algo-container .ui-datatable-tablewrapper');" widgetVar="exportTableDlg" header="Selecione o Formato para Exportação" modal="false" dynamic="true" resizable="false">
             <h:commandLink rendered="false">  
                 <p:graphicImage value="resources/images/excel.png" />  
                 <p:dataExporter type="xls" target="#{app.elementSelected.id}" fileName="#{app.requirement.requirementName}" />  
@@ -83,28 +105,8 @@
                 Your browser can't display pdf, <h:outputLink value="#{app.pdfFileStr}">click</h:outputLink> to download pdf instead.  
             </p:media>            
         </p:dialog>
-        <style>
-            .ui-algo-element-container{
-                position: relative !important;
-            }
-            .ui-algo-element-value{
-                /*position: absolute !important;*/
-            }
-        </style>
-        <script type="text/javascript">
-            /* <![CDATA[ */   
-	            onStart('#{app.containerPage}');
-            
-	            $(document).ready(function() {
-	       		 	formatMaskFields("#{msg['dateMask']}","#{msg['timeMask']}",'#{msg.thousandsSeparator}','#{msg.decimalSeparator}');                        	
-	           });	            
-            /* ]]> */
-        </script>         
-        <style>
-        	#{app.requirement.requirementStyle}
-        </style>
-    </h:form>
-    <h:form styleClass="handleFileDlgx"> 
+    
+    
         <p:dialog header="#{msg['FILE']}" onHide="updateStartPage();" widgetVar="uploadFileWv" visible="false" modal="false" dynamic="false" resizable="false">
             <h:panelGrid columns="2" styleClass="handleFileDlg">
                 <p:fileUpload sizeLimit="15000000" invalidSizeMessage="Tamanho do Arquivo Inválido! Limite de 15MB excedido." fileUploadListener="#{(app.handleFileUpload)}" mode="advanced" dragDropSupport="false" auto="true" uploadLabel="#{msg.upload}" cancelLabel="#{msg.cancel}" label="#{msg.include}"/>

@@ -406,6 +406,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			//userAuth = getAppBean().getAppBean().userAuth;			
 		}
 		if(loginBean!=null && loginBean.isReloadView()){
+			//beanListMap = new HashMap();
+			//beanListFilteredMap = new HashMap();			
 			firstRender = true;
 		}
 		//updateContainerPage();
@@ -987,16 +989,21 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 							continue;
 						}
 					}
-					if(criteria.equals("equals")){
+					if(criteria.equals("equals") || criteria.equals("eq")){
 						if(!field1Value.equals(field2)){
 							continue;
 						}
 					}			
-					if(criteria.equals("lessThan")){
+					if(criteria.equals("lessThan") || criteria.equals("lt")){
 						if(!(field1Value.compareTo(field2)<0)){
 							continue;
 						}
-					}						
+					}	
+					if(criteria.equals("greaterThan") || criteria.equals("gt")){
+						if(!(field1Value.compareTo(field2)>0)){
+							continue;
+						}
+					}							
 					Object keyMap = devEntityObject;
 					Object valMap = devEntityObject;
 					String valStr = "";
@@ -1587,26 +1594,39 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 	public void eventBean(){
 		Map callMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();	
+		String call = "";
+		try {
+			call = String.valueOf(callMap.get("call"));
+			if(!call.contains(".")){
+				actionCall(call);
+			}else{
+				AlgodevUtil.event(callMap, this);					
+			}		
+			boolean update = Boolean.parseBoolean(Objects.toString(callMap.get("update"),"false"));
+			if(update){
+			}
+		} catch (Exception e) {
+			Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, e);
+		}
+	}
+	
+	public void actionCall(String call){
 		String message = null;
 		try {
 			firstRender = true;
-			String call = String.valueOf(callMap.get("call"));
 			System.out.println("### EVENT CALL: "+call);
-			if(!call.contains(".")){
-				Map<String,String> map = new HashMap<String,String>();
-				jsEngine.put("map", map);
-				jsEngine.eval(call);
-				message = map.get("message");
-				String callback = map.get("callback");				
-				if(callback!=null){
-					//callback = StringEscapeUtils.escapeJavaScript(callback);
-					RequestContext reqCtx = RequestContext.getCurrentInstance();        
-					reqCtx.addCallbackParam("callback", callback);				
-					System.out.println("### EVENT CALLBACK: "+callback);
-				}
-			}else{
-				AlgodevUtil.event(callMap, this);					
+			Map<String,String> map = new HashMap<String,String>();
+			jsEngine.put("map", map);
+			jsEngine.eval(call);
+			message = map.get("message");
+			String callback = map.get("callback");				
+			if(callback!=null){
+				//callback = StringEscapeUtils.escapeJavaScript(callback);
+				RequestContext reqCtx = RequestContext.getCurrentInstance();        
+				reqCtx.addCallbackParam("callback", callback);				
+				System.out.println("### EVENT CALLBACK: "+callback);
 			}
+			
 		} catch (ScriptException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1622,13 +1642,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				}
 			}
 		}
-		boolean update = Boolean.parseBoolean(Objects.toString(callMap.get("update"),"false"));
-		if(update){
-		}
+
 		//setAlgoContainer();
 		ComponentFactory.resetComponent();
 		//String listField = String.valueOf(map.get("list_field"));
-		//String targetField = String.valueOf(map.get("target_field"));
+		//String targetField = String.valueOf(map.get("target_field"));		
 	}
 	protected boolean isInvalidUpdateContainer = false;
 	
@@ -1817,8 +1835,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}		
 	public void preRenderComponent(ComponentSystemEvent event){
 		if(firstRender && requirement !=null){
-			setAlgoContainer();			
+			//updateContainerPage();
+			//ComponentFactory.resetComponent(algoContainer);
+			setAlgoContainer();		
 			firstRender = false;
+			
 		}
 	}
 	class AppComponentListener implements ComponentSystemEventListener, Serializable{

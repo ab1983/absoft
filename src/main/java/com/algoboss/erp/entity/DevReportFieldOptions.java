@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.persistence.*;
 
+import com.algoboss.erp.util.LayoutFieldsFormat;
+
 /**
  *
  * @author Agnaldo
@@ -37,7 +39,10 @@ public class DevReportFieldOptions implements Serializable, Cloneable {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "field_options_id")
     private List<DevReportFieldOptionsMap> fieldOptionsMapList = new ArrayList<DevReportFieldOptionsMap>();   
-
+    @ManyToOne(fetch = FetchType.EAGER,optional = false)
+    @JoinColumn(name = "field_container_id")
+    private DevReportFieldContainer fieldContainerParent;
+    
     public Long getFieldOptionsId() {
         return fieldOptionsId;
     }
@@ -68,9 +73,17 @@ public class DevReportFieldOptions implements Serializable, Cloneable {
 
     public void setFieldOptionsMapList(List<DevReportFieldOptionsMap> fieldOptionsMapList) {
         this.fieldOptionsMapList = fieldOptionsMapList;
-    }
+    }    
+    
+    public DevReportFieldContainer getFieldContainerParent() {
+		return fieldContainerParent;
+	}
 
-    @Override
+	public void setFieldContainerParent(DevReportFieldContainer fieldContainerParent) {
+		this.fieldContainerParent = fieldContainerParent;
+	}
+
+	@Override
     public int hashCode() {
         int hash = 3;
         hash = 97 * hash + (this.fieldOptionsId != null ? this.fieldOptionsId.hashCode() : 0);
@@ -111,6 +124,37 @@ public class DevReportFieldOptions implements Serializable, Cloneable {
 	public DevReportFieldOptions attr(String optionName, String optionValue){
 		loadOpt(this, optionName, "String").setOptionsValue(optionValue);
 		return this;
+	}
+	
+	public DevReportFieldOptions children(){
+		loadOpt(this, "Children", "Array").setOptionsValue(null);
+		return this;
+	}	
+	
+	public DevReportFieldOptions each(String function){
+		loadOpt(this, "Children", "Array").setOptionsValue(function);
+		return this;
+	}	
+	
+	public DevReportFieldOptions add(String componentClazz){
+		return create(componentClazz);
+	}
+	
+	public DevReportFieldOptions create(String componentClazz){
+		String suffixClazz = "";
+		int indexComponent = 0;
+		List<DevReportFieldOptions> DevReportFieldOptionsList = fieldContainerParent.getFieldOptionsList();
+		for (DevReportFieldOptions devReportFieldOptions : DevReportFieldOptionsList) {
+			if(devReportFieldOptions.getName().startsWith(name+";"+componentClazz)){
+				indexComponent++;
+			}
+		}
+		if(!componentClazz.startsWith(".")){
+			suffixClazz= ";"+componentClazz+";"+indexComponent;
+		}
+		DevReportFieldOptions fieldOptions = LayoutFieldsFormat.load(new DevEntityObject(), fieldContainerParent, name+suffixClazz);
+		LayoutFieldsFormat.loadOpt(fieldOptions, "create", "String").setOptionsValue(this.getName()+";"+componentClazz);	
+		return fieldOptions;
 	}
 	
 	public static DevReportFieldOptionsMap loadOpt(DevReportFieldOptions fieldOptions, String optionName, String optionType) {

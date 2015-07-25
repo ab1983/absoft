@@ -492,18 +492,43 @@ public class ComponentFactory {
 					String[] styleClassArray = create.toString().split(";");
 					String parentStyleClass = styleClassArray[0];
 					String templateStyleClass = styleClassArray[1];
-					UIComponent c_comp_to_clone = findComponentByStyleClass(templateStyleClass,elementPanel);
-					UIComponent c_comp_parent = findComponentByStyleClass(parentStyleClass,parent.getParent());
+					UIComponent c_comp_to_clone = null;
+					if(!templateStyleClass.startsWith(".")){
+						try {						
+							c_comp_to_clone = (UIComponent)Class.forName(templateStyleClass).newInstance();
+						} catch (ClassNotFoundException e) {
+						} catch (InstantiationException e) {
+						} catch (IllegalAccessException e) {
+						}
+					}
+					if(c_comp_to_clone == null){
+						c_comp_to_clone = findComponentByStyleClass(templateStyleClass,elementPanel);
+					}
+					UIComponent c_comp_parent = parentStyleClass.isEmpty()?parent.getParent():findComponentByStyleClass(parentStyleClass,parent.getParent());
 					UIComponent c_comp_new = ComponentFactory.componentClone(c_comp_to_clone, false);
 					mapParam.clear();
 					
-					String style = getProperty(c_comp_to_clone, "styleClass")+" c_"+parentContainer;
+					String style = Objects.toString(getProperty(c_comp_to_clone, "styleClass"),"")+" c_"+parentContainer;
 					mapParam.put("styleClass", style+" "+styleClassName);					
 					ComponentFactory.updateElementProperties(c_comp_new, mapParam);
 					c_comp_parent.getChildren().add(c_comp_new);
 				}					
 	
-				UIComponent c_comp_to_update = findComponentByStyleClass(devReportFieldOptions.getName(),parent.getParent());
+				UIComponent c_comp_to_update = null;
+				if(devReportFieldOptions.getName().contains(";")){
+					String[] styleClassArray = create.toString().split(";");
+					String parentStyleClass = styleClassArray[0];
+					String clazzName = styleClassArray[1];
+					UIComponent c_comp_parent = parentStyleClass.isEmpty()?parent.getParent():findComponentByStyleClass(parentStyleClass,parent.getParent());
+					List<UIComponent> children = c_comp_parent.getChildren();
+					for (UIComponent uiComponent : children) {
+						if(uiComponent.getClass().getCanonicalName().equals(clazzName)){
+							c_comp_to_update = uiComponent;
+						}
+					}
+				}else{
+					c_comp_to_update = findComponentByStyleClass(devReportFieldOptions.getName(),parent.getParent());
+				}
 				if(c_comp_to_update!=null){
 					mapParam.clear();
 					for (DevReportFieldOptionsMap fieldOptionsMap : devReportFieldOptions.getFieldOptionsMapList()) {

@@ -481,4 +481,29 @@ public class AlgodevUtil {
         return algoApp;
     }
     
+    /**
+     * Geração de JSon passando a nome da classe.
+     */
+    public static void populateEntityClassByClassName(DevEntityClass entity){
+    	try {
+    		entity.getEntityPropertyDescriptorList().clear();
+			Class clazz = Class.forName(entity.getCanonicalClassName());			
+			Field[] fields = clazz.getDeclaredFields();
+			entity.setLabel(clazz.getSimpleName());
+			for (int i = 0; i < fields.length; i++) {
+				Field field = fields[i];
+				if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
+					DevEntityPropertyDescriptor prop = new DevEntityPropertyDescriptor();
+					prop.setPropertyLabel(field.getName());
+					prop.setPropertyType(field.getType().getSimpleName().toUpperCase());
+					List<DevEntityPropertyDescriptorConfig> configList = new ArrayList();
+					prop.setEntityPropertyDescriptorConfigList(configList);
+					entity.getEntityPropertyDescriptorList().add(prop);
+				}
+			}
+		} catch (ClassNotFoundException e) {
+			Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, e);
+		}
+    	
+    }    
 }

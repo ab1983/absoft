@@ -1739,7 +1739,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
                 	//response.sendRedirect(request.getContextPath()+"?file=teste.pdf");
                     response.reset();
                     response.setHeader("Location", "http://www.google.com");
-                    response.setHeader("Refresh","5; URL=" + request.getContextPath()+"?file=teste.pdf");
+                    //response.setHeader("Refresh","5; URL=" + request.getContextPath()+"?file=teste.pdf");
                     //response.encodeURL(request.getContextPath()+"?file=teste");
                     response.setContentType("application/pdf");
                     response.setHeader("Content-Disposition", "inline;filename=\"file_" + AlgoUtil.escapeURL(bean.getReportRequirementName()) + ".pdf\";");

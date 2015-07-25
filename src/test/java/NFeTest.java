@@ -1,11 +1,17 @@
-import static org.junit.Assert.*;
-
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 
+import org.apache.commons.httpclient.protocol.Protocol;
 import org.junit.Test;
 
+import com.algoboss.integration.ssl.DynamicSocketFactory;
 import com.fincatto.nfe310.FabricaDeObjetosFake;
 import com.fincatto.nfe310.NFeConfig;
 import com.fincatto.nfe310.classes.NFAmbiente;
@@ -14,7 +20,6 @@ import com.fincatto.nfe310.classes.NFUnidadeFederativa;
 import com.fincatto.nfe310.classes.lote.envio.NFLoteEnvio;
 import com.fincatto.nfe310.classes.lote.envio.NFLoteEnvioRetorno;
 import com.fincatto.nfe310.webservices.WSFacade;
-import com.google.gson.Gson;
 
 
 public class NFeTest {
@@ -33,14 +38,13 @@ public class NFeTest {
 			@Override
 			public String getCertificadoSenha() {
 				// TODO Auto-generated method stub PKCS12
-				//return "digo2000";
-				return "fmaa";
+				return "digo2000";
 			}
 			
 			@Override
 			public File getCertificado() throws IOException {
 				// TODO Auto-generated method stub
-				return new File("D:\\Documents\\@fiscal\\Backup_Cert_e_Banco\\StudioFMnew.pfx");
+				return new File("D:\\Documents\\@fiscal\\Backup_Cert_e_Banco\\CertMais.pfx");
 			}
 			
 			@Override
@@ -64,7 +68,11 @@ public class NFeTest {
 		};
 		
 		try {
+			
+ 					
+			
 			NFLoteEnvio lote = FabricaDeObjetosFake.getNFLoteEnvio();
+			DynamicSocketFactory.generateSslByNFeConfig(config);
 			final NFLoteEnvioRetorno retorno = new WSFacade(config).enviaLote(lote);
 			System.out.println(retorno.getInfoRecebimento());
 		} catch (IOException e) {
@@ -75,5 +83,6 @@ public class NFeTest {
 			e.printStackTrace();
 		}
 	}
+	
 
 }

@@ -1105,32 +1105,21 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
      */
     public void generateClassDescriptionByClassName(){
     	try {
-    		entity.getEntityPropertyDescriptorList().clear();
-			Class clazz = Class.forName(entity.getCanonicalClassName());			
-			Field[] fields = clazz.getDeclaredFields();
-			entity.setLabel(clazz.getSimpleName());
-			for (int i = 0; i < fields.length; i++) {
-				Field field = fields[i];
-				if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
-					DevEntityPropertyDescriptor prop = new DevEntityPropertyDescriptor();
-					prop.setPropertyLabel(field.getName());
-					prop.setPropertyType(field.getType().getSimpleName().toUpperCase());
-					List<DevEntityPropertyDescriptorConfig> configList = new ArrayList();
-					prop.setEntityPropertyDescriptorConfigList(configList);
-					entity.getEntityPropertyDescriptorList().add(prop);
-				}
-			}
+    		AlgodevUtil.populateEntityClassByClassName(entity);
 			bean.getService().setDescription(AlgodevUtil.entityToString(entity));
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, e);
 		}
     	
     }
+    
     public void createByConstructorFull() {
     }
+    
     private void createByConstructor(Map map, UIComponent cloned, UIComponent compTarget) {
     	createByConstructor(map, cloned, compTarget, elementsContainerMap, bean, entity, propertySelectedFormCollection,  propertySelectedListCollection);
     }
+    
     private void createByConstructor(Map map, UIComponent cloned, UIComponent compTarget, Map<String,List<UIComponent>> elementsContainerMap, DevRequirement bean, DevEntityClass entity, List<DevEntityPropertyDescriptor> propertySelectedFormCollection, List<DevEntityPropertyDescriptor> propertySelectedListCollection) {
 		elementsContainerMap.clear();
         UIComponent elementPanel = BaseBean.getAlgoPalette();

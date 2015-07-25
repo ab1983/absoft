@@ -80,7 +80,7 @@
     <class>com.algoboss.erp.entity.StkOutputDocumentItem</class>
     <class>com.algoboss.erp.entity.StkSupplyCategory</class>
     <class>com.algoboss.erp.entity.StkSupplyItem</class>
-    <class>com.algoboss.erp.entity.StkUnitOfMeasure</class>   
+    <class>com.algoboss.erp.entity.StkUnitOfMeasure</class> 
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
 	    <property name="eclipselink.target-server" value="JBoss"/>
@@ -115,6 +115,8 @@
     <class>com.algoboss.integration.small.entity.Transpor</class>     
     <class>com.algoboss.integration.small.entity.Os</class>
     <class>com.algoboss.integration.small.entity.Compra</class>
+    <class>com.algoboss.integration.small.entity.Emitente</class>
+    <class>com.algoboss.integration.small.entity.Municipio</class>      
    	<properties>
         <property name="javax.persistence.jdbc.driver" value="org.firebirdsql.jdbc.FBDriver"/>
         <!-- property name="javax.persistence.jdbc.url" value="jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB"/-->

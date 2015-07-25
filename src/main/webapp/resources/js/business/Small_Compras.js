@@ -129,7 +129,7 @@ function onConstruction() {
 		fmt.label("saidah", "HORA ENTRADA", "form", "list");
 		fmt.label("volumes", "QUANTIDADE", "form", "list");
 		fmt.label("total", "TOTAL NFE", "form", "list");
-		fmt.label("baseicm", "% BASE ICMS", "form");
+		fmt.label("baseicm", "BASE ICMS", "form");
 		fmt.label("mercadoria", "VALOR PRODUTOS", "form", "list");
 
 		fmt.label("produtos.codigo", "CÓDIGO/DESCRIÇÃO", "form-form-1236_itens002");
@@ -140,7 +140,7 @@ function onConstruction() {
 		fmt.label("produtos.vicms", "VALOR ICMS", "form-form-1236_itens002", "form-list-1236_itens002");
 		fmt.label("produtos.ipi", "% IPI", "form-form-1236_itens002", "form-list-1236_itens002");
 		fmt.label("produtos.vipi", "VALOR IPI", "form-form-1236_itens002", "form-list-1236_itens002");
-		fmt.label("produtos.base", "BASE ICMS", "form-form-1236_itens002", "form-list-1236_itens002");
+		fmt.label("produtos.base", "% BASE ICMS", "form-form-1236_itens002", "form-list-1236_itens002");
 		fmt.label("produtos.quantidade", "QTDE", "form-list-1236_itens002");
 
 		fmt.style("form-form-1236_itens002", "produtos.codigo", "width:350px;");
@@ -192,6 +192,9 @@ function produtoTotalCalcImpl(app, precoRecalc) {
 	try {
 		var obj = app.getBean();
 		if (obj != null && obj.getEntityClass().getName().equals("1236_compra")) {
+			if(obj.getProp("nfexml") != null){
+				//return;
+			}
 			// volumesCalc(obj);
 			var objChild = app.getChildBean();
 			if (objChild != null && !objChild.getEntityPropertyValueList().isEmpty()) {
@@ -263,7 +266,7 @@ function putProdutoTotal(app, objChild) {
 	try {
 		var isOk = true;
 		if(objChild.getPropObj(campoVinculo)!==null){
-			return isOk;
+			//return isOk;
 		}
 		var obj = app.getBean();
 		var quantidade = objChild.getProp("produtos.quantidade");
@@ -278,6 +281,7 @@ function putProdutoTotal(app, objChild) {
 		var totalIcms = 0;
 		var totalIpi = 0;
 		var ipiUnitario = 0;
+		var peso = 0;
 
 		if (quantidade === null || quantidade == 'null' || unitario === null || unitario == 'null') {
 			isOk = false;
@@ -285,13 +289,15 @@ function putProdutoTotal(app, objChild) {
 		var codigo = objChild.getProp("produtos.codigo");
 		var produto = SmallUtil.getProduto(codigo, app);
 		if (produto == null) {
-			isOk = false;
-		}
-		if (isOk) {
-			var peso = produto.getProp("peso");
-			if (peso == null) {
-				peso = 0;
+			if(obj.getPropObj("nfexml")!==null){
+				isOk = true;
+			}else{
+				isOk = false;
 			}
+		}else{
+			peso = produto.getProp("peso")|0;
+		}
+		if (isOk) {			
 			base = objChild.getProp("produtos.base", 0);
 			icms = objChild.getProp("produtos.icm", 0);
 			ipi = objChild.getProp("produtos.ipi", 0);
@@ -376,6 +382,25 @@ function onNew() {
 	}
 }
 
+function hasNumeronf(numeronf, nomeFornecedor){
+	var hasnumeronf = "";
+	try {
+		if (numeronf !== "" && nomeFornecedor !== "") {
+			try {
+				hasnumeronf = app.getBaseDao().getEntityManagerSmall().createNativeQuery(
+						"select NUMERONF from COMPRAS WHERE NUMERONF LIKE '%" + numeronf + "' AND FORNECEDOR LIKE '" + nomeFornecedor + "';")
+						.getSingleResult();
+			} catch (e) {
+				// println(e);
+			}
+		}
+	} catch (e) {
+		println(e);
+		// numeronf = 0;
+	}	
+	return (hasnumeronf !== ""); 
+}
+
 function onBlurNumeroNf() {
 	try {
 		var obj = app.getBean();
@@ -400,7 +425,7 @@ function onBlurNumeroNf() {
 				println(e);
 				// numeronf = 0;
 			}
-			if (hasnumeronf !== "") {
+			if (hasNumeronf(numeronf, nomeFornecedor)) {
 				obj.getPropObj("numeronf").setPropertyValue("");
 				var message = "NFe já cadastrada para este fornecedor!";
 				map.put("message", message);
@@ -626,6 +651,8 @@ function importXmlNfe() {
 			var natOpeNf = "";
 			var dhEmiNf = ideNFe.getDhEmi()!=null?new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(ideNFe.getDhEmi()):null;
 			var dhSaiEnt = ideNFe.getDhSaiEnt()!=null?new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(ideNFe.getDhSaiEnt()):null;
+			var transp = infNFe.getTransp();
+			var volArray = transp.getVol();
 
 			var compras = new Compras();
 			compras.nfeid = nfeId;
@@ -634,18 +661,38 @@ function importXmlNfe() {
 			compras.emissao = dhEmiNf;
 			compras.saidad = dhSaiEnt;
 			compras.saidah = dhSaiEnt!=null?new java.text.SimpleDateFormat("HH:mm:ss").format(dhSaiEnt):null;
-
+			
+			//###TOTAL
 			compras.total = tot.getVNF();
 			// compras.descricao3
 			compras.icms = tot.getVICMS();
 			compras.ipi = tot.getVIPI();
+			compras.baseicm = tot.getVBC();
+			compras.mercadoria = tot.getVNF();
 			
+			for (var volIdx = 0; volIdx < volArray.size(); volIdx++) {
+				var vol = volArray.get(volIdx);
+				//compras.volumes = new Double(Objects.toString(compras.volumes,"0")) + new Double(vol.getQVol());
+				compras.pesoliqui = new Double(Objects.toString(compras.pesoliqui,"0")) + new Double(Objects.toString(vol.getPesoL(),"0"));				
+				
+			}
+		
+			compras.volumes = detalhe.size();//new Double(Objects.toString(compras.volumes,"0")) + new Double(vol.getQVol());
 			compras.operacao = ideNFe.getNatOp();
 			compras.fornecedor = emitNFe.getXNome();
 			var cnpj = emitNFe.getCNPJ();
 			compras.produtos = new ArrayList();
 			var fornecedor = SmallUtil.getClienteByInscricao(cnpj, app);
-			
+			if(fornecedor != null){
+				nomeFornecedor = fornecedor.getProp("nome");
+				if (hasNumeronf(compras.numeronf, nomeFornecedor)) {
+					var message = "NFe "+compras.numeronf+" do Fornecedor "+nomeFornecedor+" já cadastrada!";
+					map.put("message", message);
+					map.put("callback", "restartFormChanged();focusBean('.c_numeronf .c_input');");
+					println(message);				
+					return;
+				}
+			}
 			jsonToEntObj(compras, obj);
 			var msgRetorno = "";
 			var isDentroEstado = null;
@@ -661,7 +708,6 @@ function importXmlNfe() {
 			var objChildList = obj.getProp("produtos");
 			var produtos = new ArrayList();
 			obj.getPropObj("produtos").setVal(produtos);
-			var codOper = "";
 			for (var x = 0; x < detalhe.size(); x++) {
 				var detItem = detalhe.get(x);
 				var produto = new Produto();
@@ -673,6 +719,7 @@ function importXmlNfe() {
 				produto.codigo = prod.getCProd();
 				produto.cfop = convertCfop(prod.getCFOP(), isDentroEstado);
 				produto.total = prod.getVProd();
+				produto.numeronf = compras.numeronf;
 				
 				//CÁLCULO ICMS
 				var icms = imposto.getICMS();
@@ -682,26 +729,29 @@ function importXmlNfe() {
 					produto.vicms = icms00.getVICMS();
 					produto.icm = icms00.getPICMS();
 					produto.base = icms00.getVBC() / produto.total * 100;
+					produto.vbc = icms00.getVBC();
 				}
 				
 				var icms10 = icms.getICMS10();
 				if(icms10){
 					produto.vicms = icms10.getVICMS();
 					produto.icm = icms10.getPICMS();
-					produto.base = icms10.getVBC() / produto.total * 100;					
+					produto.base = icms10.getVBC() / produto.total * 100;	
+					produto.vbc = icms10.getVBC();
 				}
 				var icms20 = icms.getICMS20();
 				if(icms20){
 					produto.vicms = icms20.getVICMS();
 					produto.icm = icms20.getPICMS();
-					produto.base = icms20.getVBC() / produto.total * 100;						
+					produto.base = icms20.getVBC() / produto.total * 100;	
+					produto.vbc = icms20.getVBC();
 				}
 				var icms30 = icms.getICMS30();
 				if(icms30){
 					produto.vicmss = icms30.getVICMSST();
 					produto.icm = icms30.getPICMSST();
 					produto.vbcst = icms30.getVBCST();
-					produto.base = icms30.getVBCST() / produto.total * 100;						
+					produto.base = icms30.getVBCST() / produto.total * 100;		
 				}				
 				var icms40 = icms.getICMS40();
 				if(icms40){
@@ -790,7 +840,20 @@ function importXmlNfe() {
 				
 				
 				produto.descricao = prod.getXProd();
-				codOper = produto.cfop;
+
+				if(isDentroEstado != null){
+					var operacao = SmallUtil.getOperacaoByCodigo(produto.cfop, app);
+					if(x == 0){
+						if (operacao == null) {
+							msgRetorno += "Operação não encontrada! Nome: " + compras.operacao + "\\n";
+						}else{
+							obj.getPropObj("operacao").setVal(operacao.getProp("nome"));
+						}							
+					}
+					if (operacao == null) {
+						msgRetorno += "CFOP não encontrado! Código: " + produto.cfop + "\\n";
+					}
+				}				
 				var bool = app.newChildBean("1236_compra.produtos");
 				if (bool) {
 					var vinculoProduto = cnpj + ":" + produto.codigo;
@@ -809,16 +872,9 @@ function importXmlNfe() {
 					}
 				}
 			}
-			if(isDentroEstado != null){
-				var operacao = SmallUtil.getOperacaoByCodigo(codOper, app);
-				if (operacao == null) {
-					msgRetorno += "Operação não encontrada! Nome: " + compras.operacao + "\\n";
-				}else{
-					obj.getPropObj("operacao").setVal(operacao.getProp("nome"));
-				}
-			}
+
 			
-			produtoTotalCalc();
+			//produtoTotalCalc();
 			// compras.volumes =
 			if(msgRetorno){
 				map.put("callback", "alert('" + msgRetorno + "');");
@@ -845,7 +901,7 @@ function stack(e){
 
 
 
-function atualizarCadastroEstoque(update){
+function atualizarCadastroEstoque(update){ 
 	var obj = app.getBean();
 	var produtos = obj.getProp("produtos");
 	var hasToUpdate = false;
@@ -854,7 +910,7 @@ function atualizarCadastroEstoque(update){
 		var vinculoProduto = produto.getPropObj(campoVinculo);
 		var codigo = produto.getProp("codigo");
 		try {
-			if(vinculoProduto!=null && vinculoProduto!='' && codigo!=''){
+			if(vinculoProduto!==null && vinculoProduto!='' && codigo!='' && codigo!==null){
 				hasToUpdate = true;
 				if(update){
 					vinculoProduto = vinculoProduto.getVal();

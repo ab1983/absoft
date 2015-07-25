@@ -27,14 +27,20 @@
         <tr><td><p:selectOneMenu styleClass="ui-algo-element  ui-algo-element-value data-select" filter="true" filterMatchMode="contains"><f:selectItem itemLabel="#{msg.select}" itemValue=""/><f:selectItems value=""></f:selectItems><p:ajax process="@this"/></p:selectOneMenu> </td></tr>
         <tr><td>#{msg['checkBox']}:</td></tr>
         <tr><td><p:selectBooleanCheckbox styleClass="ui-algo-element  ui-algo-element-value"/> </td></tr>
+        <tr><td>#{msg['radioBox']}:</td></tr>
+        <tr><td><p:selectOneRadio styleClass="ui-algo-element  ui-algo-element-value ui-selectOneRadio"></p:selectOneRadio> </td></tr>        
         <tr><td>#{msg['commandButton']}:</td></tr>
         <tr><td><p:commandButton styleClass="ui-algo-element  ui-algo-element-value ui-commandButton" value="Button" immediate="true"/> </td></tr>
         <tr><td>#{msg['commandLink']}:</td></tr>
         <tr><td><p:commandLink styleClass="ui-algo-element  ui-algo-element-value ui-commandLink" value="Link" immediate="true"/> </td></tr>
+        <tr><td>#{msg['button']}:</td></tr>
+        <tr><td><p:button styleClass="ui-algo-element  ui-algo-element-value ui-button" value="Button" immediate="true"/> </td></tr>        
         <tr><td>#{msg['tabView']}:</td></tr>
         <tr><td><p:tabView styleClass="ui-algo-element ui-algo-element-container"><p:tab title="Tab1"/></p:tabView></td></tr>
         <tr><td>#{msg['panel']}:</td></tr>
         <tr><td><p:panel styleClass="ui-algo-element ui-algo-element-container ui-panel" header="Panel"/></td></tr>
+        <tr><td>#{msg['dialog']}:</td></tr>
+        <tr><td><p:dialog styleClass="ui-algo-element ui-algo-element-container ui-dialog" header="Dialog"/></td></tr>        
         <tr><td>#{msg['fieldSet']}:</td></tr>
         <tr><td><p:fieldset styleClass="ui-algo-element ui-algo-element-container data-form" legend="Fieldset"></p:fieldset></td></tr>
         <tr><td>#{msg['dataTable']}:</td></tr>
@@ -71,6 +77,7 @@
     <p:outputPanel styleClass="ui-algo-element ui-algo-element-container"/>       
     <h:panelGroup styleClass="data-panel"></h:panelGroup>
     <h:outputText styleClass="data-output"/>
+    <h:commandLink styleClass="ui-commandLink-native"/>
     <style>
         /* BEGIN ELEMENT PANEL*/
         /*

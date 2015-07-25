@@ -20,9 +20,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.namespace.QName;
 
 
 /**
@@ -2870,6 +2872,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "infNFe",
     "signature"
 })
+@XmlRootElement(name="NFe")
 public class TNFe {
 
     @XmlElement(required = true)
@@ -11191,6 +11194,10 @@ public class TNFe {
                 	return null;
                 }
                 
+                public void setICMS(TNFe.InfNFe.Det.Imposto.ICMS icms){
+                	addElement(icms,"ICMS");
+                }
+                
                 public TIpi getIPI(){
                 	List<JAXBElement<?>> list = getContent();
                 	for (Iterator iterator = list.iterator(); iterator.hasNext();) {
@@ -11201,6 +11208,10 @@ public class TNFe {
 					}
                 	return null;
                 }
+                
+                public void setIPI(TIpi ipi){
+                	addElement(ipi,"IPI");
+                }                
                 
                 public TNFe.InfNFe.Det.Imposto.PIS getPIS(){
                 	List<JAXBElement<?>> list = getContent();
@@ -11213,6 +11224,10 @@ public class TNFe {
                 	return null;
                 }    
                 
+                public void setPIS(TNFe.InfNFe.Det.Imposto.PIS pis){
+                	addElement(pis,"PIS");
+                }                        
+                
                 public TNFe.InfNFe.Det.Imposto.COFINS getCOFINS(){
                 	List<JAXBElement<?>> list = getContent();
                 	for (Iterator iterator = list.iterator(); iterator.hasNext();) {
@@ -11222,7 +11237,25 @@ public class TNFe {
 						}
 					}
                 	return null;
-                }                   
+                }   
+                
+                public void setCOFINS(TNFe.InfNFe.Det.Imposto.COFINS cofins){
+                	addElement(cofins,"COFINS");
+                }        
+                
+                public <T> void addElement(T value,String name){
+                	List<JAXBElement<?>> list = getContent();
+                	for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+						JAXBElement<?> jaxbElement = (JAXBElement<?>) iterator.next();
+						if(jaxbElement.getDeclaredType().isAssignableFrom(value.getClass())){
+							JAXBElement<T> jax = (JAXBElement<T>)jaxbElement;
+							jax.setValue(value);
+							return;
+						}
+					} 
+                	list.add(new JAXBElement<T>(new QName(name), (Class<T>) value.getClass(), value));                	
+                	
+                }
                 /**
                  * <p>Java class for anonymous complex type.
                  * 
@@ -13495,6 +13528,26 @@ public class TNFe {
                         }
 
                         /**
+                         * Origem da mercadoria
+                         * 
+                        0 - Nacional, exceto as indicadas nos códigos 3, 4, 5 e 8;
+						1 - Estrangeira - Importação direta, exceto a indicada no
+						código 6;
+						2 - Estrangeira - Adquirida no mercado interno, exceto a
+						indicada no código 7;
+						3 - Nacional, mercadoria ou bem com Conteúdo de
+						Importação superior a 40% e inferior ou igual a 70%;
+						4 - Nacional, cuja produção tenha sido feita em
+						conformidade com os processos produtivos básicos de
+						que tratam as legislações citadas nos Ajustes;
+						5 - Nacional, mercadoria ou bem com Conteúdo de
+						Importação inferior ou igual a 40%;
+						6 - Estrangeira - Importação direta, sem similar nacional,
+						constante em lista da CAMEX e gás natural;
+						7 - Estrangeira - Adquirida no mercado interno, sem
+						similar nacional, constante lista CAMEX e gás natural.
+						8 - Nacional, mercadoria ou bem com Conteúdo de
+						Importação superior a 70%;
                          * Sets the value of the orig property.
                          * 
                          * @param value
@@ -13543,6 +13596,11 @@ public class TNFe {
                         }
 
                         /**
+                         * Modalidade de determinação da BC do ICMS
+                         0=Margem Valor Agregado (%);
+						1=Pauta (Valor);
+						2=Preço Tabelado Máx. (valor);
+						3=Valor da operação.
                          * Sets the value of the modBC property.
                          * 
                          * @param value
@@ -20852,7 +20910,7 @@ public class TNFe {
 
                 @XmlElement(required = true)
                 protected String cProd;
-                @XmlElement(name = "cEAN", required = true)
+                @XmlElement(name = "cEAN", required = true, nillable= true)
                 protected String cean;
                 @XmlElement(required = true)
                 protected String xProd;
@@ -20872,7 +20930,7 @@ public class TNFe {
                 protected String vUnCom;
                 @XmlElement(required = true)
                 protected String vProd;
-                @XmlElement(name = "cEANTrib", required = true)
+                @XmlElement(name = "cEANTrib", required = true, nillable= true)
                 protected String ceanTrib;
                 @XmlElement(required = true)
                 protected String uTrib;
@@ -21254,6 +21312,12 @@ public class TNFe {
                 }
 
                 /**
+                 * Valor Unitário de tributação
+                 * Informar o valor unitário de tributação do produto, campo
+					meramente informativo, o contribuinte pode utilizar a
+					precisão desejada (0-10 decimais). Para efeitos de
+					cálculo, o valor unitário será obtido pela divisão do valor
+					do produto pela quantidade tributável (NT 2013/003).
                  * Sets the value of the vUnTrib property.
                  * 
                  * @param value
@@ -21374,8 +21438,12 @@ public class TNFe {
                 }
 
                 /**
+                 * Indica se valor do Item (vProd) entra
+					no valor total da NF-e (vProd)
                  * Sets the value of the indTot property.
-                 * 
+                 * 0=Valor do item (vProd) não compõe o valor total da NF-e
+                 *1=Valor do item (vProd) compõe o valor total da NF-e
+				 *(vProd) (v2.0)
                  * @param value
                  *     allowed object is
                  *     {@link String }

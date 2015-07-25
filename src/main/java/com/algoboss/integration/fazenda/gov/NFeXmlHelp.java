@@ -1,9 +1,13 @@
 package com.algoboss.integration.fazenda.gov;
 
 import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 /**
@@ -36,6 +40,29 @@ public class NFeXmlHelp {
 			e.printStackTrace();
 		}
 		return tNfeProc;
+	}
+	
+	public static <T> String generate(T obj){
+		  try {
+			  
+				//File file = new File("C:\\file.xml");
+				JAXBContext jaxbContext = JAXBContext.newInstance(obj.getClass());
+				Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+		 
+				// output pretty printed
+				jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		 
+				//jaxbMarshaller.marshal(customer, file);
+				StringWriter sw = new StringWriter(); 
+				jaxbMarshaller.marshal(obj, sw);
+				return new String(sw.toString().getBytes(Charset.defaultCharset()),"UTF8");
+		      } catch (JAXBException e) {
+		    	  e.printStackTrace();
+		      } catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		 return null;
 	}
 
 }
